@@ -66,8 +66,8 @@ public class nfoto extends AppCompatActivity {
 //        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
 //        startActivity(intent);
 
-//        Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        context.startActivityForResult(photoCaptureIntent, requestCode);
+        Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(photoCaptureIntent, requestCode);
     }
 
 

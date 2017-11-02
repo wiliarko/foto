@@ -1,99 +1,123 @@
 package com.wili.foto;
 
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.media.Image;
-import android.support.v7.app.AlertDialog;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.wili.libfoto.nfoto;
 
 import java.io.File;
 
-import pl.aprilapps.easyphotopicker.DefaultCallback;
-import pl.aprilapps.easyphotopicker.EasyImage;
-
 public class MainActivity extends AppCompatActivity {
 
-    public static final int REQUEST_CODE_CAMERA = 0012;
-    public static final int REQUEST_CODE_GALLERY = 0013;
-
-    private Button btnLoadImage;
-    private ImageView ivImage;
-    private TextView tvPath;
-    private String [] items = {"Camera","Gallery"};
+    private ImageView imageHolder;
+    private final int requestCode = 1;
+    String path_photo = "";
+    Uri ImageCaptureUri;
+    Bitmap bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btnLoadImage = (Button) findViewById(R.id.btn_take_image);
-        ivImage = (ImageView) findViewById(R.id.image_view_image);
-        tvPath = (TextView) findViewById(R.id.textview_image_path);
+        final nfoto foto = new nfoto();
 
-        btnLoadImage.setOnClickListener(new View.OnClickListener() {
+
+
+        imageHolder = (ImageView)findViewById(R.id.captured_photo);
+        Button capturedImageButton = (Button)findViewById(R.id.take_picture);
+        capturedImageButton.setOnClickListener( new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-//                openImage();
-                EasyImage.openCamera(MainActivity.this,REQUEST_CODE_CAMERA);
+            public void onClick(View v) {
+                foto.runfoto();
+//                foto.berhasil();
+//                Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+////                startActivityForResult(photoCaptureIntent, requestCode);
+//
+//                File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"takePicture");
+//                mediaStorageDir.mkdirs();
+//                File mediaFile;
+//                mediaFile = new File(mediaStorageDir.getPath() + File.separator+ "IMG_" + System.currentTimeMillis() + ".jpg");
+//                path_photo = mediaFile.toString();
+//
+//                //cek pembuatan folder
+//                if (!mediaStorageDir.exists()) {
+//                    if (!mediaStorageDir.mkdirs()) {
+//                        Toast.makeText(getApplicationContext(), "Oops! Failed create directory",Toast.LENGTH_LONG).show();
+//                        mediaFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator+ "IMG_" + System.currentTimeMillis() + ".jpg");
+//                        path_photo = mediaFile.toString();
+//                    }
+//                }
+//                ImageCaptureUri = Uri.fromFile(mediaFile);
+//                photoCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, ImageCaptureUri);
+//                startActivityForResult(photoCaptureIntent, requestCode);
             }
         });
     }
 
-    /**
-     * this method used to open image directory or open from camera
-     */
-    private void openImage(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Options");
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if(items[i].equals("Camera")){
-                    EasyImage.openCamera(MainActivity.this,REQUEST_CODE_CAMERA);
-                }else if(items[i].equals("Gallery")){
-                    EasyImage.openGallery(MainActivity.this, REQUEST_CODE_GALLERY);
-                }
-            }
-        });
+    public void decodeFile(String filePath) {
+        // Decode image size
+        BitmapFactory.Options bm = new BitmapFactory.Options();
+        bm.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filePath, bm);
+        final int REQUIRED_SIZE = 1024;
+        int width_tmp = bm.outWidth,
+                height_tmp = bm.outHeight;
 
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        int scale = 1;
+        while (true) {
+            if (width_tmp < REQUIRED_SIZE && height_tmp < REQUIRED_SIZE)
+                break;
+            width_tmp /= 2;
+            height_tmp /= 2;
+            scale *= 2;
+        }
+        BitmapFactory.Options o2 = new BitmapFactory.Options();
+        o2.inSampleSize = scale;
+        bitmap = BitmapFactory.decodeFile(filePath, o2);
+
+
+
+        imageHolder.setImageBitmap(bitmap);
+        imageHolder.getLayoutParams().height=600;
+        imageHolder.getLayoutParams().width=600;
     }
 
+
+    @SuppressWarnings("deprecation")
+    public String getPath(Uri uri ) {
+        String[] projection = { MediaColumns.DATA };
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        if (cursor != null) {
+            int column_index = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
+            cursor.moveToFirst();
+            path_photo = cursor.getString(column_index);
+            return cursor.getString(column_index);
+        } else
+            return null;
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
-            @Override
-            public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
-                switch (type){
-                    case REQUEST_CODE_CAMERA:
-                        Glide.with(MainActivity.this)
-                                .load(imageFile)
-                                .centerCrop()
-                                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                .into(ivImage);
-                        tvPath.setText(imageFile.getAbsolutePath());
-                        break;
-                    case REQUEST_CODE_GALLERY:
-                        Glide.with(MainActivity.this)
-                                .load(imageFile)
-                                .centerCrop()
-                                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                .into(ivImage);
-                        tvPath.setText(imageFile.getAbsolutePath());
-                        break;
-                }
-            }
-        });
+        if(this.requestCode == requestCode && resultCode == RESULT_OK){
+//            Bitmap bitmap = (Bitmap)data.getExtras().get("data");
+//            imageHolder.setImageBitmap(bitmap);
+
+            System.out.println("FILE PATH FROM CAMERA: "+path_photo);
+            decodeFile(path_photo.toString());
+        }
     }
 }
