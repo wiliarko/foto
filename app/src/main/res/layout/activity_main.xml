@@ -1,24 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:id="@+id/activity_main"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-tools:context="com.wili.foto.MainActivity">
-<Button
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Take Picture"
-    android:id="@+id/take_picture"
-    android:layout_alignParentBottom="true"
-    android:layout_centerHorizontal="true" />
-<ImageView
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/captured_photo"
-    android:layout_above="@id/take_picture"
-    android:layout_alignParentTop="true"
-    android:layout_alignParentLeft="true"
-    android:contentDescription="captured image"
-    android:layout_alignParentStart="true" />
-</RelativeLayout>
+    android:orientation="vertical"
+    tools:context="com.wili.foto.MainActivity">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:clickable="true"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_blue_dark">
+        <Button
+            android:id="@+id/btn_take_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="@android:color/white"
+            android:text="Open Image" />
+    </FrameLayout>
+
+    <ImageView
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:id="@+id/image_view_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@android:drawable/alert_dark_frame"
+        android:scaleType="fitCenter"/>
+
+    <TextView
+        android:id="@+id/textview_image_path"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
+        android:text="The Image path"/>
+</LinearLayout>

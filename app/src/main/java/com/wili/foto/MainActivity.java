@@ -26,25 +26,22 @@ public class MainActivity extends AppCompatActivity {
     String path_photo = "";
     Uri ImageCaptureUri;
     Bitmap bitmap;
+    final nfoto foto = new nfoto();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final nfoto foto = new nfoto();
-
-
-
-        imageHolder = (ImageView)findViewById(R.id.captured_photo);
-        Button capturedImageButton = (Button)findViewById(R.id.take_picture);
+        imageHolder = (ImageView)findViewById(R.id.image_view_image);
+        Button capturedImageButton = (Button)findViewById(R.id.btn_take_image);
         capturedImageButton.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                foto.runfoto();
+                foto.runfoto(MainActivity.this);
 //                foto.berhasil();
 //                Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-////                startActivityForResult(photoCaptureIntent, requestCode);
+//                startActivityForResult(photoCaptureIntent, requestCode);
 //
 //                File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"takePicture");
 //                mediaStorageDir.mkdirs();
@@ -111,13 +108,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        System.out.println("berhasil a");
         super.onActivityResult(requestCode, resultCode, data);
         if(this.requestCode == requestCode && resultCode == RESULT_OK){
+            System.out.println("berhasil");
+            imageHolder.setImageURI(foto.url());
+
 //            Bitmap bitmap = (Bitmap)data.getExtras().get("data");
 //            imageHolder.setImageBitmap(bitmap);
-
-            System.out.println("FILE PATH FROM CAMERA: "+path_photo);
-            decodeFile(path_photo.toString());
+//            System.out.println(foto.lastlyTakenButCanceledPhoto(MainActivity.this));
+//            System.out.println("FILE PATH FROM CAMERA: "+path_photo);
+//            decodeFile(path_photo.toString());
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.wili.libfoto;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -15,10 +16,33 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.app.Activity;
+import android.content.ClipData;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Parcelable;
+import android.preference.PreferenceManager;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.text.TextUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.io.File;
 
-public class nfoto extends AppCompatActivity {
+public class nfoto {
 
     private ImageView imageHolder;
     private final int requestCode = 1;
@@ -26,102 +50,23 @@ public class nfoto extends AppCompatActivity {
     Uri ImageCaptureUri;
     Bitmap bitmap;
     Context context;
+    private static final String KEY_LAST_CAMERA_PHOTO="";
+    static File file;
+    static Uri fileUri;
+    final int RC_TAKE_PHOTO = 1;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-//        capturedImageButton.setOnClickListener( new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                foto.berhasil();
-//                Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-////                startActivityForResult(photoCaptureIntent, requestCode);
-//
-//                File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"takePicture");
-//                mediaStorageDir.mkdirs();
-//                File mediaFile;
-//                mediaFile = new File(mediaStorageDir.getPath() + File.separator+ "IMG_" + System.currentTimeMillis() + ".jpg");
-//                path_photo = mediaFile.toString();
-//
-//                //cek pembuatan folder
-//                if (!mediaStorageDir.exists()) {
-//                    if (!mediaStorageDir.mkdirs()) {
-//                        Toast.makeText(getApplicationContext(), "Oops! Failed create directory",Toast.LENGTH_LONG).show();
-//                        mediaFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator+ "IMG_" + System.currentTimeMillis() + ".jpg");
-//                        path_photo = mediaFile.toString();
-//                    }
-//                }
-//                ImageCaptureUri = Uri.fromFile(mediaFile);
-//                photoCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, ImageCaptureUri);
-//                startActivityForResult(photoCaptureIntent, requestCode);
-//            }
-//        });
+    public static void runfoto(Activity activity){
+        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+        file = new File(activity.getExternalCacheDir(),
+                String.valueOf(System.currentTimeMillis()) + ".jpg");
+        fileUri = Uri.fromFile(file);
+        System.out.println("ini apa ; "+fileUri);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+        activity.startActivityForResult(intent,1);
     }
 
-    public void nfoto(Context context){
-        this.context=context;
+    public Uri url(){
+        return fileUri;
     }
 
-    public void runfoto(){
-//        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-//        startActivity(intent);
-
-        Intent photoCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(photoCaptureIntent, requestCode);
-    }
-
-
-    public void decodeFile(String filePath) {
-        // Decode image size
-        BitmapFactory.Options bm = new BitmapFactory.Options();
-        bm.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(filePath, bm);
-        final int REQUIRED_SIZE = 1024;
-        int width_tmp = bm.outWidth,
-                height_tmp = bm.outHeight;
-
-        int scale = 1;
-        while (true) {
-            if (width_tmp < REQUIRED_SIZE && height_tmp < REQUIRED_SIZE)
-                break;
-            width_tmp /= 2;
-            height_tmp /= 2;
-            scale *= 2;
-        }
-        BitmapFactory.Options o2 = new BitmapFactory.Options();
-        o2.inSampleSize = scale;
-        bitmap = BitmapFactory.decodeFile(filePath, o2);
-
-
-
-        imageHolder.setImageBitmap(bitmap);
-        imageHolder.getLayoutParams().height=600;
-        imageHolder.getLayoutParams().width=600;
-    }
-
-
-    @SuppressWarnings("deprecation")
-    public String getPath(Uri uri ) {
-        String[] projection = { MediaColumns.DATA };
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
-        if (cursor != null) {
-            int column_index = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
-            cursor.moveToFirst();
-            path_photo = cursor.getString(column_index);
-            return cursor.getString(column_index);
-        } else
-            return null;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(this.requestCode == requestCode && resultCode == RESULT_OK){
-//            Bitmap bitmap = (Bitmap)data.getExtras().get("data");
-//            imageHolder.setImageBitmap(bitmap);
-
-            System.out.println("FILE PATH FROM CAMERA: "+path_photo);
-            decodeFile(path_photo.toString());
-        }
-    }
 }
